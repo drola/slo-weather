@@ -1,0 +1,5 @@
+PROJECT_DIR=/home/ubuntu/slo-weather
+POETRY=/home/ubuntu/.local/bin/poetry
+
+# Every day at 4:17
+4 17 * * * cd $PROJECT_DIR && $POETRY run scrapy crawl stations >> $PROJECT_DIR/data/scrape_stations.log 2>&1

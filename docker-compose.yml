@@ -1,0 +1,16 @@
+# postgresql service
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: slo_weather
+      POSTGRES_USER: slo_weather
+      POSTGRES_PASSWORD: slo_weather
+    ports:
+      - 16432:5432
+  superset:
+    image: apache/superset
+    environment:
+      - SUPERSET_SECRET_KEY="7AHrETGuLeNx4qKOyLgjp/LGrkbWa6dyZvRFVc/R3zM="
+    ports:
+      - 8088:8088
