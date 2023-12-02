@@ -19,7 +19,7 @@ class Station(BaseModel):
 
 
 class Datapoint(BaseModel):
-    station_arso_code: str
+    station_arso_code: str # from XML <domain_meteosiId>
     sunrise: datetime.datetime
     sunset: datetime.datetime
     interval_start: datetime.datetime  # from XML <validStart>

@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS weather_datapoints
     id                          SERIAL
         constraint weather_datapoints_pk
             primary key,
-    station_arso_code           VARCHAR(10) NOT NULL
+    station_arso_code           VARCHAR(255) NOT NULL
         constraint fk_weather_datapoints_station_arso_code
             references stations(arso_code),
     sunrise                     TIMESTAMP,
@@ -29,3 +29,8 @@ CREATE TABLE IF NOT EXISTS weather_datapoints
     sun_radiation_diffuse_avg   REAL,
     visibility                  REAL
 );
+
+alter table weather_datapoints
+    add constraint weather_datapoints_pk2
+        unique (station_arso_code, interval_start, interval_end);
+

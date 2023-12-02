@@ -102,7 +102,7 @@ FEEDS = {
         },
         "item_classes": ["scraper.items.Station"],
     },
-    "./data/meteo_data_archive_%(batch_time)s.json": {
+    "./data/meteo_data_archive_%(batch_time)s.json.gz": {
         "format": "jsonlines",
         "encoding": "utf8",
         "store_empty": False,
@@ -110,5 +110,6 @@ FEEDS = {
             "export_empty_fields": True,
         },
         "item_classes": ["scraper.items.StationArchiveXml"],
+        "postprocessing": ['scrapy.extensions.postprocessing.GzipPlugin']
     }
 }

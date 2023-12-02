@@ -10,7 +10,8 @@ def main():
     data_dir = get_data_dir()
 
     stations_data_paths = [os.path.join(data_dir, filename) for filename in os.listdir(data_dir) if
-                           filename.endswith(".json") and filename.startswith("stations_")]
+                           (filename.endswith(".json") or filename.endswith(".json.gz")) and
+                           filename.startswith("stations_")]
     stations_data_paths.sort()
 
     newest_stations_data_path = stations_data_paths[-1]
