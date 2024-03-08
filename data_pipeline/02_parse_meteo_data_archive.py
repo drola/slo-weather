@@ -1,6 +1,8 @@
 import os
 import xml.etree.ElementTree as ET
+from json import JSONDecodeError
 from typing import Iterable
+from multiprocessing import Pool
 
 from data_pipeline import db
 from data_pipeline.jsonl_util import read_jsonl
@@ -113,17 +115,46 @@ def upsert_datapoint(datapoint: Datapoint, cursor):
     """, datapoint.model_dump())
 
 
-def datapoints_in_dir(data_dir: str) -> Iterable[Datapoint]:
+def get_input_files_list(data_dir: str) -> list:
     meteo_data_archive_paths = [os.path.join(data_dir, filename) for filename in os.listdir(data_dir) if
                                 (filename.endswith(".json") or filename.endswith(".json.gz")) and
                                 filename.startswith("meteo_data_archive_")]
     meteo_data_archive_paths.sort()
+    return meteo_data_archive_paths
+
+
+def datapoints_in_file(file_path: str) -> Iterable[Datapoint]:
+    data = read_jsonl(file_path)
+    for row in data:
+        for datapoint in xml_to_datapoints(row['xml']):
+            yield datapoint
+
+
+def datapoints_in_dir(data_dir: str) -> Iterable[Datapoint]:
+    meteo_data_archive_paths = get_input_files_list(data_dir)
 
     for path in meteo_data_archive_paths:
-        data = read_jsonl(path)
-        for row in data:
-            for datapoint in xml_to_datapoints(row['xml']):
-                yield datapoint
+        print("Reading", path)
+        return datapoints_in_file(path)
+
+
+def upsert_datapoints_in_file(file_path: str):
+    print("Reading", file_path)
+    with db.connect(autocommit=True) as conn:
+        try:
+            for datapoint in datapoints_in_file(file_path):
+                upsert_datapoint(datapoint, conn)
+        except JSONDecodeError as e:
+            print(f"Failed to read {file_path}: {e}")
+    print("Done loading", file_path)
+
+
+def main_multiprocessing():
+    data_dir = get_data_dir()
+    meteo_data_archive_paths = get_input_files_list(data_dir)
+
+    with Pool(processes=24) as p:
+        p.map(upsert_datapoints_in_file, meteo_data_archive_paths)
 
 
 def main():
@@ -134,6 +165,7 @@ def main():
 
             for datapoint in datapoints_in_dir(data_dir):
                 upsert_datapoint(datapoint, cur)
+
                 datapoint_counter += 1
 
                 if datapoint_counter % 1000 == 0:
@@ -143,4 +175,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main_multiprocessing()
+    #main()
