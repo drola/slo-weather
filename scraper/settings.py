@@ -93,7 +93,7 @@ FEED_EXPORT_ENCODING = "utf-8"
 FEED_URI_PARAMS = "scraper.util.uri_params"
 LOG_LEVEL = 'INFO'
 FEEDS = {
-    "./data/stations_%(batch_time)s.json": {
+    "./data/stations_%(batch_time)s.json.gz": {
         "format": "jsonlines",
         "encoding": "utf8",
         "store_empty": False,
@@ -101,6 +101,7 @@ FEEDS = {
             "export_empty_fields": True,
         },
         "item_classes": ["scraper.items.Station"],
+        "postprocessing": ['scrapy.extensions.postprocessing.GzipPlugin']
     },
     "./data/meteo_data_archive_%(batch_time)s.json.gz": {
         "format": "jsonlines",

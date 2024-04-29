@@ -20,3 +20,17 @@ up to two days of already ingested data.
 PYTHONPATH=. poetry run python ./data_pipeline/02_parse_meteo_data_archive.py
 
 ```
+
+
+## Pipeline v2
+```mermaid
+flowchart TD
+  meteo_data_archive_json
+  meteo_data_archive_csv
+  stations_json
+	stations_csv
+
+	meteo_data_archive_json --> meteo_data_archive_csv
+	stations_json --> stations_csv
+```
+
