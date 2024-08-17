@@ -23,8 +23,8 @@ ENV VIRTUAL_ENV=/app/.venv \
 RUN groupadd --gid 1000 nonroot \
     && useradd --uid 1000 --gid 1000 --no-create-home --shell /bin/bash nonroot
 
-COPY --from=builder --chown=nonroot:nonroot ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --link --chown=nonroot:nonroot . /app
+COPY --from=builder --chown=1000:1000 ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --link --chown=1000:1000 . /app
 
 USER nonroot
 WORKDIR /app
