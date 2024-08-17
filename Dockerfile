@@ -20,11 +20,11 @@ FROM python:3.12-slim AS runtime
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH"
 
-COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --link . /app
 RUN groupadd --gid 1000 nonroot \
     && useradd --uid 1000 --gid 1000 --no-create-home --shell /bin/bash nonroot \
-    && chown -R nonroot:nonroot /app
+
+COPY --from=builder --chown=nonroot:nonroot ${VIRTUAL_ENV} ${VIRTUAL_ENV}
+COPY --link --chown=nonroot:nonroot . /app
 
 USER nonroot
 WORKDIR /app
