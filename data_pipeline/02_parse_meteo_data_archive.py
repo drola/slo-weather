@@ -146,6 +146,8 @@ def upsert_datapoints_in_file(file_path: str):
                 upsert_datapoint(datapoint, conn)
         except JSONDecodeError as e:
             print(f"Failed to read {file_path}: {e}")
+        except EOFError as e:
+            print(f"Failed to read {file_path}: {e}")
     print("Done loading", file_path)
 
 

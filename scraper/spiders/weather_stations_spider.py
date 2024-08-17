@@ -1,10 +1,10 @@
 import scrapy
 
-from scraper.items import Station, Point, StationArchiveXml
+from scraper.items import WeatherStation, Point, WeatherStationArchiveXml
 
 
-class StationsSpider(scrapy.Spider):
-    name = "stations"
+class WeatherStationsSpider(scrapy.Spider):
+    name = "weather_stations"
 
     def start_requests(self):
         manned_stations_url = 'https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observation_si_latest.xml'
@@ -19,7 +19,7 @@ class StationsSpider(scrapy.Spider):
 
     def parse_stations_list(self, response):
         for station in response.xpath('//metData'):
-            station = Station(
+            station = WeatherStation(
                 meteosiId=station.xpath('.//domain_meteosiId/text()').get().strip('_'),
                 countryIsoCode2=station.xpath('.//domain_countryIsoCode2/text()').get(),
                 coordinates=Point(
@@ -38,7 +38,7 @@ class StationsSpider(scrapy.Spider):
             )
 
     def parse_meteo_data(self, response):
-        yield StationArchiveXml(
+        yield WeatherStationArchiveXml(
             meteosiId=response.xpath('//metData/domain_meteosiId/text()').get(),
             xml=response.text
         )

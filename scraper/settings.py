@@ -6,6 +6,8 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+from scraper.items import WeatherStation, WeatherStationArchiveXml, BuoyDatapoint, BuoyDatapointV2, BuoyDatapointV3, \
+    RiverDatapoint, HtmlDatapoint
 
 BOT_NAME = "scraper"
 
@@ -93,24 +95,34 @@ FEED_EXPORT_ENCODING = "utf-8"
 FEED_URI_PARAMS = "scraper.util.uri_params"
 LOG_LEVEL = 'INFO'
 FEEDS = {
-    "./data/stations_%(batch_time)s.json.gz": {
+    "./data/weather_stations_%(batch_time)s.json.gz": {
         "format": "jsonlines",
         "encoding": "utf8",
         "store_empty": False,
         "item_export_kwargs": {
             "export_empty_fields": True,
         },
-        "item_classes": ["scraper.items.Station"],
+        "item_classes": [WeatherStation],
         "postprocessing": ['scrapy.extensions.postprocessing.GzipPlugin']
     },
-    "./data/meteo_data_archive_%(batch_time)s.json.gz": {
+    "./data/weather_data_%(batch_time)s.json.gz": {
         "format": "jsonlines",
         "encoding": "utf8",
         "store_empty": False,
         "item_export_kwargs": {
             "export_empty_fields": True,
         },
-        "item_classes": ["scraper.items.StationArchiveXml"],
+        "item_classes": [WeatherStationArchiveXml],
         "postprocessing": ['scrapy.extensions.postprocessing.GzipPlugin']
+    },
+    "./data/waters_%(spider_name)s_%(batch_time)s.json.gz": {
+        "format": "jsonlines",
+        "encoding": "utf8",
+        "store_empty": False,
+        "item_export_kwargs": {
+            "export_empty_fields": True,
+        },
+        "item_classes": [BuoyDatapoint, BuoyDatapointV2, BuoyDatapointV3, RiverDatapoint, HtmlDatapoint],
+        "postprocessing": ['scrapy.extensions.postprocessing.GzipPlugin'],
     }
 }
