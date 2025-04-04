@@ -8,3 +8,6 @@ __pycache__/
 .scrapy
 
 data/*.log
+/docker-data
+/timescaledb-data
+/grafana-data

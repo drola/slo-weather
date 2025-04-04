@@ -380,7 +380,6 @@ fn main() {
     let out_csv_path = "/home/drola/work/slo-weather/rust_data_pipeline/out.csv";
     let files = list_files(data_dir).unwrap();
 
-    // rayon::ThreadPoolBuilder::new().num_threads(1).build_global().unwrap();
     main_parallel(&files, out_csv_path);
 
     // TODO: Intern strings https://docs.rs/internment/0.3.6/internment/index.html

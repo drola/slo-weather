@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"github.com/orisano/gosax"
 	"io"
 	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -46,29 +48,29 @@ type MeteoDataJsonLine struct {
 }
 
 type MeteoDataXml struct {
-	StationArsoCode         string       `xml:"domain_meteosiId"`
-	Sunrise                 meteoXmlTime `xml:"sunrise"`
-	Sunset                  meteoXmlTime `xml:"sunset"`
-	IntervalStart           meteoXmlTime `xml:"validStart"`
-	IntervalEnd             meteoXmlTime `xml:"validEnd"`
-	TemperatureDewPoint     float64      `xml:"td"`
-	TemperatureAirAvg       float64      `xml:"tavg"`
-	TemperatureAirMax       float64      `xml:"tx"`
-	TemperatureAirMin       float64      `xml:"tn"`
-	HumidityRelativeAvg     float64      `xml:"rhavg"`
-	WindDirectionAvg        float64      `xml:"ddavg_val"`
-	WindDirectionMaxGust    float64      `xml:"ddmax_val"`
-	WindSpeedAvg            float64      `xml:"ffavg_val"`
-	WindSpeedMax            float64      `xml:"ffmax_val"`
-	PressureMeanSeaLevelAvg float64      `xml:"mslavg"`
-	PressureSurfaceLevelAvg float64      `xml:"pavg"`
-	PrecipitationSum10min   float64      `xml:"rr_val"`
-	PrecipitationSum1h      float64      `xml:"tp_1h_acc"`
-	PrecipitationSum24h     float64      `xml:"tp_24h_acc"`
-	SnowCoverHeight         float64      `xml:"snow"`
-	SunRadiationGlobalAvg   float64      `xml:"gSunRadavg"`
-	SunRadiationDiffuseAvg  float64      `xml:"diffSunRadavg"`
-	Visibility              float64      `xml:"vis_val"`
+	//StationArsoCode         string       `xml:"domain_meteosiId"`
+	//Sunrise                 meteoXmlTime `xml:"sunrise"`
+	//Sunset                  meteoXmlTime `xml:"sunset"`
+	//IntervalStart           meteoXmlTime `xml:"validStart"`
+	//IntervalEnd             meteoXmlTime `xml:"validEnd"`
+	//TemperatureDewPoint     float64      `xml:"td"`
+	//TemperatureAirAvg       float64      `xml:"tavg"`
+	//TemperatureAirMax       float64      `xml:"tx"`
+	//TemperatureAirMin       float64      `xml:"tn"`
+	//HumidityRelativeAvg     float64      `xml:"rhavg"`
+	//WindDirectionAvg        float64      `xml:"ddavg_val"`
+	//WindDirectionMaxGust    float64      `xml:"ddmax_val"`
+	//WindSpeedAvg            float64      `xml:"ffavg_val"`
+	//WindSpeedMax            float64      `xml:"ffmax_val"`
+	//PressureMeanSeaLevelAvg float64      `xml:"mslavg"`
+	//PressureSurfaceLevelAvg float64      `xml:"pavg"`
+	//PrecipitationSum10min   float64      `xml:"rr_val"`
+	//PrecipitationSum1h      float64      `xml:"tp_1h_acc"`
+	//PrecipitationSum24h     float64      `xml:"tp_24h_acc"`
+	//SnowCoverHeight         float64      `xml:"snow"`
+	//SunRadiationGlobalAvg   float64      `xml:"gSunRadavg"`
+	//SunRadiationDiffuseAvg  float64      `xml:"diffSunRadavg"`
+	//Visibility              float64      `xml:"vis_val"`
 }
 
 type MeteoDataXmlDocument struct {
@@ -163,12 +165,50 @@ func processFile(inputFile string) []MeteoDataXml {
 
 		//println("Token count", tokenCount)
 		//
-		xmlObjs := MeteoDataXmlDocument{}
-		err = xml.Unmarshal([]byte(obj.Xml), &xmlObjs)
-		allData = append(allData, xmlObjs.MetData...)
-		if err != nil {
-			log.Fatalf("xml error: %v", err)
-			return nil
+		//xmlObjs := MeteoDataXmlDocument{}
+		//err = xml.Unmarshal([]byte(obj.Xml), &xmlObjs)
+		//allData = append(allData, xmlObjs.MetData...)
+		//if err != nil {
+		//	log.Fatalf("xml error: %v", err)
+		//	return nil
+		//}
+
+		//decoder := xml.NewDecoder(strings.NewReader(obj.Xml))
+		//for {
+		//	t, _ := decoder.Token()
+		//	if t == nil {
+		//		break
+		//	}
+		//	switch se := t.(type) {
+		//	case xml.StartElement:
+		//		if se.Name.Local == "metData" {
+		//			allData = append(allData, MeteoDataXml{})
+		//			//decoder.DecodeElement(&xmlObjs, &se)
+		//		}
+		//	}
+		//}
+
+		r := gosax.NewReader(strings.NewReader(obj.Xml))
+		for {
+			e, err := r.Event()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if e.Type() == gosax.EventEOF {
+				break
+			}
+			if e.Type() == gosax.EventStart {
+				elem, err := gosax.StartElement(e.Bytes)
+				if err != nil {
+					log.Fatalf("start element error: %v", err)
+				}
+				if elem.Name.Local == "metData" {
+					allData = append(allData, MeteoDataXml{})
+				}
+			}
+			//if e.Type() == gosax.EventStart && bytes.Compare(e.Bytes, []byte("<metData>")) == 0 {
+			//	allData = append(allData, MeteoDataXml{})
+			//}
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -188,9 +228,10 @@ func main() {
 	for _, inputFile := range get_input_files_list(dataDir) {
 		fmt.Println("Processing file", inputFile)
 		dataFromFile := processFile(inputFile)
-		for _, data := range dataFromFile {
-			allData[fmt.Sprintf("%s-%s", data.StationArsoCode, data.IntervalStart)] = data
-		}
+		println("Count of data from file", len(dataFromFile))
+		//for _, data := range dataFromFile {
+		//allData[fmt.Sprintf("%s-%s", data.StationArsoCode, data.IntervalStart)] = data
+		//}
 		println("Count of allData", len(allData))
 		fileCount++
 		if len(allData) > 50000 || fileCount >= 3 {

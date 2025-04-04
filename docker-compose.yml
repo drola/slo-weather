@@ -14,3 +14,19 @@ services:
       - SUPERSET_SECRET_KEY="7AHrETGuLeNx4qKOyLgjp/LGrkbWa6dyZvRFVc/R3zM="
     ports:
       - 8088:8088
+  timescaledb:
+    image: timescale/timescaledb-ha:pg17
+    environment:
+      POSTGRES_DB: slo_weather
+      POSTGRES_USER: slo_weather
+      POSTGRES_PASSWORD: slo_weather
+    volumes:
+      - ./timescaledb-data:/home/postgres/pgdata/data
+    ports:
+      - 26433:5432
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana-data:/var/lib/grafana
